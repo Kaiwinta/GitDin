@@ -1,0 +1,47 @@
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# --- Build output ---
+dist/
+dist-ssr/
+*.local
+
+# --- Coverage / Tests ---
+coverage/
+*.lcov
+.vitest/
+playwright-report/
+test-results/
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Env files (contiennent des secrets) ---
+.env
+.env.*
+!.env.example
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- TypeScript / Vite ---
+*.tsbuildinfo
+*.vite
+
+# Fichiers générés par les outillages Vue/Volar
+**/*.vue.js
+**/*.vue.d.ts
+
+.npmrc
