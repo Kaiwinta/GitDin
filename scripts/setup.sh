@@ -27,31 +27,55 @@ elif [ "$PKG_MANAGER" = "pacman" ]; then
 fi
 
 # -------------------------------
-# Install Node.js (22.x LTS)
+# Install / Update NVM + Node.js 20.x LTS
 # -------------------------------
-if [ "$PKG_MANAGER" = "apt-get" ]; then
-  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-elif [ "$PKG_MANAGER" = "pacman" ]; then
-  sudo pacman -S --noconfirm nodejs npm
+echo "[*] Installing or updating NVM..."
+export NVM_DIR="$HOME/.nvm"
+if [ -d "$NVM_DIR" ]; then
+  cd "$NVM_DIR"
+  git fetch origin
+  git checkout "$(git describe --abbrev=0 --tags)"
+  cd -
+else
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 fi
+
+# Load nvm into current shell
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+echo "[*] Installing Node.js 20.x LTS via NVM..."
+nvm install 20
+nvm alias default 20
+nvm use 20
 
 # -------------------------------
 # Update npm to latest
 # -------------------------------
 echo "[*] Updating npm globally..."
-sudo npm install -g npm@latest
+npm install -g npm@latest
 
 # -------------------------------
 # Install pnpm (via npm)
 # -------------------------------
 if ! command -v pnpm >/dev/null 2>&1; then
   echo "[*] Installing pnpm..."
-  sudo npm install -g pnpm
+  npm install -g pnpm
+fi
+
+# -------------------------------
+# Install project dependencies
+# -------------------------------
+if [ -f "package.json" ]; then
+  echo "[*] Installing project dependencies with pnpm..."
+  pnpm install
+else
+  echo "⚠️  No package.json found in current directory, skipping pnpm install."
 fi
 
 echo ""
-echo "✅ System dependencies installed."
+echo "✅ Setup complete."
 echo "   - Node:  $(node -v || true)"
 echo "   - npm:   $(npm -v || true)"
 echo "   - pnpm:  $(pnpm -v || true)"
+echo "   - nvm:   $(nvm --version || true)"
