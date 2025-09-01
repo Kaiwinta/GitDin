@@ -1,0 +1,33 @@
+trigger:
+  branches:
+    include:
+      - main   # déploie quand tu push sur main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '18.x'   # Vite & Vue supportent bien Node 18
+
+steps:
+  # 1. Installer Node
+  - task: NodeTool@0
+    inputs:
+      versionSpec: $(NODE_VERSION)
+    displayName: "Installer Node.js"
+
+  # 2. Installer dépendances
+  - script: npm install
+    displayName: "Installer les dépendances"
+
+  # 3. Build Vite
+  - script: npm run build
+    displayName: "Build du site Vue/Vite"
+
+  # 4. Déploiement sur Azure Static Web Apps
+  - task: AzureStaticWebApp@0
+    inputs:
+      app_location: "/"                # racine du projet
+      output_location: "dist"          # dossier généré par Vite
+      azure_static_web_apps_api_token: $(deployment_token)
+    displayName: "Déployer sur Azure Static Web Apps"
