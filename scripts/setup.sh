@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 # -------------------------------
 # Detect OS (Ubuntu/Pop vs Arch)
 # -------------------------------
-if command -v apt-get >/dev/null; then
+if command -v apt-get >/dev/null 2>&1; then
   PKG_MANAGER="apt-get"
   echo "[*] Ubuntu/Pop!_OS detected"
-elif command -v pacman >/dev/null; then
+elif command -v pacman >/dev/null 2>&1; then
   PKG_MANAGER="pacman"
   echo "[*] Arch Linux detected"
 else
-  echo "[-] Unsupported OS. Please install Node.js and pnpm manually."
+  echo "[-] Unsupported OS. Please install Node.js, npm, and pnpm manually."
   exit 1
 fi
 
@@ -19,7 +19,7 @@ fi
 # Install system dependencies
 # -------------------------------
 if [ "$PKG_MANAGER" = "apt-get" ]; then
-  sudo apt-get update
+  sudo apt-get update -y
   sudo apt-get install -y curl git build-essential
 elif [ "$PKG_MANAGER" = "pacman" ]; then
   sudo pacman -Syu --noconfirm
@@ -37,25 +37,21 @@ elif [ "$PKG_MANAGER" = "pacman" ]; then
 fi
 
 # -------------------------------
-# Install pnpm
+# Update npm to latest
 # -------------------------------
-if ! command -v pnpm >/dev/null; then
+echo "[*] Updating npm globally..."
+sudo npm install -g npm@latest
+
+# -------------------------------
+# Install pnpm (via npm)
+# -------------------------------
+if ! command -v pnpm >/dev/null 2>&1; then
   echo "[*] Installing pnpm..."
-  npm install -g pnpm
+  sudo npm install -g pnpm
 fi
 
-# -------------------------------
-# Install frontend dependencies
-# -------------------------------
-echo "[*] Installing dependencies..."
-pnpm install
-
-# Vue Router + Pinia
-pnpm add vue-router@4 pinia
-
-# TailwindCSS + PostCSS + Autoprefixer
-pnpm add -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-
 echo ""
-echo "Setup complete!"
+echo "✅ System dependencies installed."
+echo "   - Node:  $(node -v || true)"
+echo "   - npm:   $(npm -v || true)"
+echo "   - pnpm:  $(pnpm -v || true)"
